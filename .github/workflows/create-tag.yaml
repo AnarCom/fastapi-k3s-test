@@ -1,0 +1,25 @@
+name: Create image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-and-build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login to Yandex Cloud Container Registry
+        id: login-cr
+        uses: yc-actions/yc-cr-login@v3
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+      - name: Build, tag, and push image to Yandex Cloud Container Registry
+        env:
+            CR_REGISTRY: crpc04f4an6pbuvhbuec
+            CR_REPO: fastapi-test-backend
+            IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t cr.yandex/$CR_REGISTRY/$CR_REPO:$IMAGE_TAG .
+          docker push cr.yandex/$CR_REGISTRY/$CR_REPO:$IMAGE_TAG
